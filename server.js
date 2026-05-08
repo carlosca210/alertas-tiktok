@@ -42,16 +42,16 @@ io.on('connection', (socket) => {
             console.log(`🎁 REGALO DETECTADO -> Nombre: ${data.giftName} | ID: ${data.giftId} | Cantidad: ${data.repeatCount}`);//este log aparece si alguien manda regalo 
             io.emit('show-alert', { gift: data.giftName });
         });
-    });
 
-    // 2. CAPTURAR CHAT (Solo para probar si la conexión está viva)
-    tiktokConn.on('chat', (data) => {
-        console.log(`💬 Chat de ${data.uniqueId}: ${data.comment}`);
-    });
+        // 2. CAPTURAR CHAT (Solo para probar si la conexión está viva)
+        tiktokConn.on('chat', (data) => {
+            console.log(`💬 Chat de ${data.uniqueId}: ${data.comment}`);
+        });
 
-    // 3. CAPTURAR ERRORES DE LA LIBRERÍA
-    tiktokConn.on('error', (err) => {
-        console.error("⚠️ Error en el stream de datos:", err);
+        // 3. CAPTURAR ERRORES DE LA LIBRERÍA
+        tiktokConn.on('error', (err) => {
+            console.error("⚠️ Error en el stream de datos:", err);
+        });
     });
 
     // EVENTO 2: Prueba manual desde el botón del Panel
