@@ -42,34 +42,66 @@
         const socket = io();
         const video = document.getElementById('alertVideo');
 
+        // 1. CONFIGURACIÓN: Aquí añades todos los regalos que quieras
+        // Asegúrate de que el nombre coincida con lo que ves en los logs de Render
+        const library = {
+            "Rosa": { archivo: "videos/rosa.mp4", volumen: 0.1 },
+            "Rose": { archivo: "videos/rosa.mp4", volumen: 0.1 }, // Para la rosa pequeña
+            "Weights": { archivo: "videos/pesa.mp4", volumen: 0.5 },
+            "Ice Cream": { archivo: "videos/helado.mp4", volumen: 0.3 },
+            "TikTok": { archivo: "videos/tiktok.mp4", volumen: 0.2 },
+            "Dragon": { archivo: "videos/dragon.mp4", volumen: 1.0 }
+        };
+
+        // --- NUEVA LÓGICA DE COLA ---
+        let colaAlertas = []; // Aquí se guardarán los regalos que lleguen
+        let estaReproduciendo = false; // "Semáforo" para saber si el video está ocupado
+
         socket.on('show-alert', (data) => {
-            console.log("Recibida señal para:", data.gift);
+            console.log("Señal recibida para:", data.gift);
 
-            const library = {
-                "Rosa": { archivo: "videos/rosa.mp4", volumen: 0.1 }
-            };
-
-            const alertData = library[data.gift];
-
-            if (alertData) {
-                video.src = alertData.archivo;
-                video.volume = alertData.volumen;
-                video.style.display = "block"; // Lo hacemos visible
-                
-                video.play().then(() => {
-                    console.log("Reproduciendo con éxito");
-                }).catch(e => {
-                    console.error("Error al dar play:", e);
-                });
-                
-                video.onended = () => {
-                    video.style.display = "none";
-                    video.src = "";
-                };
-            } else {
-                console.log("El regalo no está en la librería");
-            }
+            // Si el regalo está en la librería, lo metemos a la fila
+         if (library[data.gift]) {
+             colaAlertas.push(data.gift);
+             procesarSiguiente(); // Intentamos reproducir
+         } else {
+             console.log(`El regalo "${data.gift}" no tiene video asignado.`);
+          }
         });
+
+        function procesarSiguiente() {
+            // Si ya hay un video en pantalla o no hay nadie en la fila, nos detenemos
+            if (estaReproduciendo || colaAlertas.length === 0) return;
+
+            estaReproduciendo = true;
+            const nombreRegalo = colaAlertas.shift(); // Sacamos el primer regalo de la fila
+            const alertData = library[nombreRegalo];
+
+            console.log(`Reproduciendo ahora: ${nombreRegalo}. Quedan en espera: ${colaAlertas.length}`);
+
+            // Configuramos el video
+            video.src = alertData.archivo;
+            video.volume = alertData.volumen;
+            video.style.display = "block";
+
+            video.play().catch(e => {
+                console.error("Error al reproducir:", e);
+                terminarAlerta(); // Si falla, pasamos al siguiente para no trabar la cola
+            });
+
+            // IMPORTANTE: Cuando el video termina, buscamos el siguiente
+            video.onended = () => {
+               terminarAlerta();
+            };
+        }
+
+        function terminarAlerta() {
+            video.style.display = "none";
+            video.src = "";
+            estaReproduciendo = false; // Liberamos el "semáforo"
+            procesarSiguiente(); // Revisamos si hay más regalos en la fila
+        }
+        // --- FIN DE LA LÓGICA DE COLA ---
     </script>
 </body>
 </html>
