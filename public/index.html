@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        /* Forzamos que el fondo no sea negro para ver si el video aparece */
+        body { 
+            margin: 0; 
+            background-color: rgba(0, 0, 0, 0.1); 
+            overflow: hidden; 
+            width: 100vw; 
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #container { 
+            width: 800px; /* Tamaño fijo para la prueba */
+            height: 600px;
+            border: 2px solid red; /* Si ves este cuadro rojo, el contenedor está bien */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        video { 
+            display: none; 
+            width: 100%; 
+            height: 100%;
+            object-fit: contain; /* Para que no se deforme */
+            background: black;  /* Fondo interno del video */
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <video id="alertVideo"></video>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const video = document.getElementById('alertVideo');
+
+        socket.on('show-alert', (data) => {
+            console.log("Recibida señal para:", data.gift);
+
+            const library = {
+                "Rosa": { archivo: "videos/rosa.mp4", volumen: 0.1 }
+            };
+
+            const alertData = library[data.gift];
+
+            if (alertData) {
+                video.src = alertData.archivo;
+                video.volume = alertData.volumen;
+                video.style.display = "block"; // Lo hacemos visible
+                
+                video.play().then(() => {
+                    console.log("Reproduciendo con éxito");
+                }).catch(e => {
+                    console.error("Error al dar play:", e);
+                });
+                
+                video.onended = () => {
+                    video.style.display = "none";
+                    video.src = "";
+                };
+            } else {
+                console.log("El regalo no está en la librería");
+            }
+        });
+    </script>
+</body>
+</html>
