@@ -10,7 +10,8 @@ const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
         origin: "*", // Permite que cualquier origen (como tu GitHub) se conecte
-        methods: ["GET", "POST"]
+        methods: ["GET", "POST"],
+        credentials: true
     }
 });
 
