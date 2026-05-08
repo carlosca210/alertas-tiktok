@@ -6,52 +6,51 @@ const { WebcastPushConnection } = require('tiktok-live-connector');
 const app = express();
 const server = http.createServer(app);
 
-// 1. CAMBIO IMPORTANTE: Configurar CORS para que GitHub Pages pueda conectarse
 const io = new Server(server, {
     cors: {
-        origin: "*", // Permite que cualquier origen (como tu GitHub) se conecte
-        methods: ["GET", "POST"],
-        allowedHeaders: ["my-cusom-header"],
-        credentials: true
+        origin: "*",
+        methods: ["GET", "POST"]
     }
 });
 
 app.use(express.static('public'));
 
-let USERNAME = "Richix_16"; 
-let tiktokConn = new WebcastPushConnection(USERNAME);
+let tiktokConn; // La conexión se iniciará desde el panel de control
 
-// Comenta estas líneas para que no den error si no estás en vivo
-/*
-tiktokConn.connect().then(() => {
+io.on('connection', (socket) => {
+    console.log('✅ Cliente conectado al socket');
 
-    console.log(`✅ Conectado al Live de ${USERNAME}`);
+    // EVENTO 1: Conectar a un usuario de TikTok desde el Panel
+    socket.on('set-tiktok-user', (username) => {
+        console.log(`Intentando conectar a TikTok: ${username}`);
+        
+        // Si ya había una conexión, la cerramos antes de abrir otra
+        if (tiktokConn) tiktokConn.disconnect();
 
-}).catch(err => console.error("❌ Error de conexión:", err));
-*/
+        tiktokConn = new WebcastPushConnection(username);
 
-//esto es para pruebas locales
-const readline = require('readline');
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        tiktokConn.connect().then(state => {
+            console.log(`✅ Conectado al Live de ${username}`);
+            socket.emit('status', { msg: `Conectado a ${username}`, color: 'green' });
+        }).catch(err => {
+            console.error("❌ Error:", err);
+            socket.emit('status', { msg: `Error: ${err.message}`, color: 'red' });
+        });
 
-console.log("⌨️ Escribe el nombre de un regalo (ej: Rosa) y presiona Enter para probar:");
+        // Reenviar regalos reales a la vista de alertas
+        tiktokConn.on('gift', (data) => {
+            io.emit('show-alert', { gift: data.giftName });
+        });
+    });
 
-rl.on('line', (input) => {
-    console.log(`Simulando regalo: ${input}`);
-    io.emit('show-alert', { gift: input });
-});
-//hasta aqui
-
-
-tiktokConn.on('gift', (data) => {
-    console.log(`Regalo recibido: ${data.giftName}`);
-    io.emit('show-alert', { gift: data.giftName });
+    // EVENTO 2: Prueba manual desde el botón del Panel
+    socket.on('test-alert', (data) => {
+        console.log(`Simulando regalo manual: ${data.gift}`);
+        io.emit('show-alert', { gift: data.gift });
+    });
 });
 
 const PORT = process.env.PORT || 80;
-// 2. CAMBIO DE PUERTO: Usamos el puerto 80 para que la URL sea más sencilla
-// Recuerda abrir la terminal como Administrador para usar este puerto
 server.listen(PORT, () => {
-    console.log("🚀 Servidor corriendo en el perto 80");
-    console.log("📡 Esperando conexiones desde GitHub Pages...");
+    console.log(`🚀 Servidor listo en puerto ${PORT}`);
 });

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Control DevOps</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: white; padding: 20px; }
+        .card { background: #1e1e1e; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; }
+        input { padding: 10px; border-radius: 5px; border: none; width: 200px; }
+        button { padding: 10px 20px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; }
+        .btn-connect { background: #00f2ea; color: black; }
+        .btn-test { background: #ff0050; color: white; margin-top: 10px; }
+        #status { margin-top: 10px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h1>🕹️ Control de Alertas</h1>
+
+    <div class="card">
+        <h3>Configuración de TikTok</h3>
+        <input type="text" id="username" placeholder="Usuario de TikTok (ej: Richix_16)">
+        <button class="btn-connect" onclick="conectarTT()">Conectar Live</button>
+        <div id="status">Estado: Desconectado</div>
+    </div>
+
+    <div class="card">
+        <h3>Pruebas Manuales</h3>
+        <button class="btn-test" onclick="probar('Rosa')">Simular Rosa</button>
+        <button class="btn-test" onclick="probar('Pesa')">Simular Pesa</button>
+    </div>
+
+    <script>
+        const socket = io();
+
+        function conectarTT() {
+            const user = document.getElementById('username').value;
+            if(!user) return alert("Escribe un usuario");
+            socket.emit('set-tiktok-user', user);
+            document.getElementById('status').innerText = "Estado: Conectando...";
+        }
+
+        function probar(regalo) {
+            socket.emit('test-alert', { gift: regalo });
+        }
+
+        socket.on('status', (data) => {
+            const s = document.getElementById('status');
+            s.innerText = "Estado: " + data.msg;
+            s.style.color = data.color;
+        });
+    </script>
+</body>
+</html>
