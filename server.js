@@ -49,7 +49,7 @@ tiktokConn.on('gift', (data) => {
 
 // 2. CAMBIO DE PUERTO: Usamos el puerto 80 para que la URL sea más sencilla
 // Recuerda abrir la terminal como Administrador para usar este puerto
-server.listen(3000, () => {
-    console.log("🚀 Servidor corriendo en http://localhost");
+server.listen(80, () => {
+    console.log("🚀 Servidor corriendo en el perto 80");
     console.log("📡 Esperando conexiones desde GitHub Pages...");
 });
