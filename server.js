@@ -11,6 +11,7 @@ const io = new Server(server, {
     cors: {
         origin: "*", // Permite que cualquier origen (como tu GitHub) se conecte
         methods: ["GET", "POST"],
+        allowedHeaders: ["my-cusom-header"],
         credentials: true
     }
 });
