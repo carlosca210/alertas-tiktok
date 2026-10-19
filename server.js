@@ -1,5 +1,6 @@
 const express = require('express');
 const http = require('http');
+const path = require('path');
 const { Server } = require('socket.io');
 const { WebcastPushConnection } = require('tiktok-live-connector');
 
@@ -24,12 +25,12 @@ function validarToken(token) {
 
 app.use(express.json());
 
-// Servir archivos estáticos pero excluyendo control.html del acceso directo
-app.use(express.static('public', { index: false }));
+// 📁 SERVIR CARPETA ESTÁTICA CON RUTA ABSOLUTA (CORREGIDO PARA RENDER / LINUX)
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 // Ruta pública principal (Alertas para OBS)
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/public/index.html');
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Endpoint de Login
@@ -52,7 +53,7 @@ app.post('/api/verify-token', (req, res) => {
 
 // Ruta para el Panel de Control (Protegida)
 app.get('/control.html', (req, res) => {
-    res.sendFile(__dirname + '/public/control.html');
+    res.sendFile(path.join(__dirname, 'public', 'control.html'));
 });
 
 const io = new Server(server, {
