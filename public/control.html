@@ -2,55 +2,354 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Panel de Control DevOps</title>
-    <script src="/socket.io/socket.io.js"></script>
+    <title>Panel de Control - Alertas Live</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: white; padding: 20px; }
-        .card { background: #1e1e1e; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; }
-        input { padding: 10px; border-radius: 5px; border: none; width: 200px; }
-        button { padding: 10px 20px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; }
-        .btn-connect { background: #00f2ea; color: black; }
-        .btn-test { background: #ff0050; color: white; margin-top: 10px; }
-        #status { margin-top: 10px; font-size: 0.9em; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 20px; 
+            background: #121212; 
+            color: #fff; 
+            margin: 0;
+        }
+        
+        /* Modal de Login */
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.9); display: flex;
+            justify-content: center; align-items: center; z-index: 999;
+        }
+        .login-box {
+            background: #1e1e1e; padding: 30px; border-radius: 8px; text-align: center;
+            border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 300px;
+        }
+        .login-box input, .login-box button { 
+            padding: 10px; margin: 8px 0; width: 90%; border-radius: 4px; border: none; 
+        }
+
+        /* Layout del Panel */
+        #panelContent { max-width: 1200px; margin: 0 auto; }
+        .header-section {
+            background: #1e1e1e; padding: 20px; border-radius: 8px; margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
+        }
+        .connection-box { display: flex; gap: 10px; align-items: center; }
+
+        /* Contenedor de Tarjetas */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        /* Estilo de la Tarjeta */
+        .card {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .card video {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 6px;
+            background: #000;
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .field-group label {
+            font-size: 12px;
+            color: #aaa;
+            font-weight: bold;
+        }
+
+        input[type="text"], input[type="number"], select {
+            padding: 8px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 4px;
+        }
+
+        .row-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .row-group .field-group { flex: 1; }
+
+        /* Botones */
+        button { 
+            padding: 10px; border-radius: 4px; border: none; 
+            cursor: pointer; font-weight: bold; transition: 0.2s;
+        }
+        .btn-primary { background: #e91e63; color: white; }
+        .btn-primary:hover { background: #c2185b; }
+        .btn-test { background: #2196F3; color: white; width: 100%; }
+        .btn-test:hover { background: #1976D2; }
+        .btn-danger { background: #ff3333; color: white; }
+        .btn-danger:hover { background: #cc0000; }
     </style>
 </head>
 <body>
-    <h1>🕹️ Control de Alertas</h1>
 
-    <div class="card">
-        <h3>Configuración de TikTok</h3>
-        <input type="text" id="username" placeholder="Usuario de TikTok (ej: Richix_16)">
-        <button class="btn-connect" onclick="conectarTT()">Conectar Live</button>
-        <div id="status">Estado: Desconectado</div>
+    <!-- OVERLAY DE AUTENTICACIÓN -->
+    <div id="loginOverlay">
+        <div class="login-box">
+            <h2>Acceso Requerido</h2>
+            <p>Ingrese su contraseña</p>
+            <input type="password" id="passInput" placeholder="Contraseña">
+            <button class="btn-primary" onclick="intentarLogin()">Entrar</button>
+            <p id="loginError" style="color: #ff5252; display: none;">Contraseña incorrecta</p>
+        </div>
     </div>
 
-    <div class="card">
-        <h3>Pruebas Manuales</h3>
-        <button class="btn-test" onclick="probar('Rosa')">Simular Rosa Grande</button>
-        <button class="btn-test" onclick="probar('White Rose')">Simular Rosa blanca</button>
-        <button class="btn-test" onclick="probar('Doughnut')">Simular Dona</button>
-        <button class="btn-test" onclick="probar('GG')">Simular GG</button>
-        <button class="btn-test" onclick="probar('Finger Heart')">Simular Corazón coreano</button>
+    <!-- CONTENIDO DEL PANEL -->
+    <div id="panelContent" style="display: none;">
+        
+        <div class="header-section">
+            <div>
+                <h2 style="margin: 0;">Alertas RichixDev</h2>
+                <p id="statusMsg" style="margin: 5px 0 0 0; color: #888;">Estado: Desconectado</p>
+            </div>
+
+            <!-- ACCESOS RÁPIDOS A PANTALLAS -->
+            <div class="screens-box">
+                <span style="font-size: 13px; color: #aaa; font-weight: bold;">Abrir Pantallas:</span>
+                <button class="btn-screen" onclick="abrirPantalla('screen1')">Screen 1</button>
+                <button class="btn-screen" onclick="abrirPantalla('screen2')">Screen 2</button>
+                <button class="btn-screen" onclick="abrirPantalla('screen3')">Screen 3</button>
+            </div>
+            
+            <div class="connection-box">
+                <input type="text" id="username" placeholder="Usuario TikTok (ej: richix_16)">
+                <button class="btn-primary" onclick="conectarTikTok()">Conectar</button>
+                <button class="btn-danger" onclick="detenerAlertas()">Limpiar Cola</button>
+            </div>
+        </div>
+
+        <h3>Recompensas y Pantallas</h3>
+
+        <!-- GRID DE TARJETAS DINÁMICAS -->
+        <div class="cards-grid" id="cardsContainer">
+            <!-- Las tarjetas se generan dinámicamente con JavaScript -->
+        </div>
     </div>
 
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         const socket = io();
+        let userToken = localStorage.getItem('panelToken') || '';
 
-        function conectarTT() {
+        // 1. LIBRERÍA DE RESPALDO BASADA EN IDS
+        let library = {
+            "alert_1": { giftName: "White Rose", archivo: "videos/rosa.webm", volumen: 0.1, duracion: 5, screen: "screen4" },
+            "alert_2": { giftName: "Doughnut", archivo: "videos/dona.webm", volumen: 0.1, duracion: 4, screen: "screen4" },
+            "alert_3": { giftName: "GG", archivo: "videos/gg.webm", volumen: 0.1, duracion: 6, screen: "screen4" },
+            "alert_4": { giftName: "Rosa", archivo: "videos/rosa-grande.webm", volumen: 0.1, duracion: 8, screen: "screen4" },
+            "alert_5": { giftName: "Finger Heart", archivo: "videos/corazon-coreano.webm", volumen: 0.1, duracion: 5, screen: "screen4" },
+            //alertas mujeres
+            "alert_6": { giftName: "White Rose", archivo: "videos/rosa-blanca-m.mp4", volumen: 0.1, duracion: 5, screen: "screen1" },
+            "alert_7": { giftName: "GG", archivo: "videos/gg-m.webm", volumen: 0.1, duracion: 5, screen: "screen1" },
+            "alert_8": { giftName: "Finger Heart", archivo: "videos/corazon-coreano-m.webm", volumen: 0.1, duracion: 5, screen: "screen1" },
+            "alert_9": { giftName: "Rosa", archivo: "videos/rosa-grande-m.webm", volumen: 0.1, duracion: 5, screen: "screen1" },
+            "alert_10": { giftName: "Doughnut", archivo: "videos/dona-m.webm", volumen: 0.1, duracion: 5, screen: "screen1" },
+            //alertas hombres
+            "alert_11": { giftName: "helado", archivo: "videos/helado.webm", volumen: 0.1, duracion: 5, screen: "screen2" },
+            "alert_12": { giftName: "", archivo: "videos/choclo.webm", volumen: 0.1, duracion: 5, screen: "screen2" },
+            "alert_13": { giftName: "", archivo: "videos/collar-osos.webm", volumen: 0.1, duracion: 5, screen: "screen2" },
+            "alert_14": { giftName: "capybara", archivo: "videos/capibara.webm", volumen: 0.1, duracion: 5, screen: "screen2" },
+            "alert_15": { giftName: "", archivo: "videos/palmera.webm", volumen: 0.1, duracion: 5, screen: "screen2" },
+            //alertas mujeres mas
+            "alert_16": { giftName: "", archivo: "videos/gorra.webm", volumen: 0.1, duracion: 5, screen: "screen3" },
+            "alert_17": { giftName: "Paper Crane", archivo: "videos/cisne-azul.webm", volumen: 0.1, duracion: 5, screen: "screen3" },
+            "alert_18": { giftName: "Hand Heart", archivo: "videos/corazon-en-manos.webm", volumen: 0.1, duracion: 5, screen: "screen3" },
+            "alert_19": { giftName: "", archivo: "videos/gafas.webm", volumen: 0.1, duracion: 5, screen: "screen3" },
+            "alert_20": { giftName: "", archivo: "videos/corgi.webm", volumen: 0.1, duracion: 5, screen: "screen3" }
+        };
+
+        // Comprobar si el token sigue siendo válido con la instancia actual del servidor
+        async function verificarSesionServidor() {
+            if (!userToken) {
+                mostrarLogin();
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/verify-token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: userToken })
+                });
+
+                const data = await res.json();
+                if (data.valid) {
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    document.getElementById('panelContent').style.display = 'block';
+                    renderizarTarjetas();
+                } else {
+                    // El servidor fue reiniciado: Invalidar token guardado
+                    localStorage.removeItem('panelToken');
+                    userToken = '';
+                    mostrarLogin();
+                }
+            } catch (err) {
+                mostrarLogin();
+            }
+        }
+
+        function mostrarLogin() {
+            document.getElementById('loginOverlay').style.display = 'flex';
+            document.getElementById('panelContent').style.display = 'none';
+        }
+
+        // Iniciar comprobación al cargar la página
+        verificarSesionServidor();
+
+        async function intentarLogin() {
+            const pass = document.getElementById('passInput').value;
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: pass })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                userToken = data.token;
+                localStorage.setItem('panelToken', userToken);
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('panelContent').style.display = 'block';
+                renderizarTarjetas();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        // Función para abrir cada pantalla en una nueva pestaña
+        function abrirPantalla(screenName) {
+            const url = `/?screen=${screenName}`;
+            window.open(url, '_blank');
+        }
+
+        // DIBUJAR TARJETAS DINÁMICAS POR ID
+        function renderizarTarjetas() {
+            const container = document.getElementById('cardsContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            Object.keys(library).forEach(alertId => {
+                const item = library[alertId];
+
+                const cardHTML = `
+                    <div class="card" data-id="${alertId}">
+                        <video src="${item.archivo}" autoplay loop muted playsinline></video>
+                        
+                        <div class="field-group">
+                            <label>Regalo en TikTok:</label>
+                            <input type="text" value="${item.giftName}" onchange="actualizarCampo('${alertId}', 'giftName', this.value, this)">
+                        </div>
+
+                        <div class="row-group">
+                            <div class="field-group">
+                                <label>Pantalla (Screen):</label>
+                                <select onchange="actualizarCampo('${alertId}', 'screen', this.value, this)">
+                                    <option value="screen1" ${item.screen === 'screen1' ? 'selected' : ''}>Screen 1</option>
+                                    <option value="screen2" ${item.screen === 'screen2' ? 'selected' : ''}>Screen 2</option>
+                                    <option value="screen3" ${item.screen === 'screen3' ? 'selected' : ''}>Screen 3</option>
+                                    <option value="screen4" ${item.screen === 'screen4' ? 'selected' : ''}>Screen 4</option>
+                                </select>
+                            </div>
+                            
+                            <div class="field-group">
+                                <label>Duración (seg):</label>
+                                <input type="number" min="1" max="60" value="${item.duracion || 5}" onchange="actualizarCampo('${alertId}', 'duracion', this.value, this)">
+                            </div>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="vol-label">Volumen (${Math.round((item.volumen ?? 0.5) * 100)}%):</label>
+                            <input type="range" min="0" max="1" step="0.05" value="${item.volumen ?? 0.5}" oninput="actualizarCampo('${alertId}', 'volumen', this.value, this)">
+                        </div>
+
+                        <button class="btn-test" onclick="probar('${item.giftName.replace(/'/g, "\\'")}')">Probar en Vivo</button>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', cardHTML);
+            });
+        }
+
+        // PROBAR REGALO DESDE LA TARJETA
+        function probar(giftName) {
+            if (typeof giftName === 'string' && giftName.trim() !== '') {
+                console.log(`📤 Enviando prueba manual para regalo: "${giftName}"`);
+                socket.emit('test-alert', { gift: giftName.trim(), token: userToken });
+                return;
+            }
+            console.warn("⚠️ No se recibió un nombre de regalo válido.");
+        }
+
+        // ENVÍO DE CAMBIOS AL SERVIDOR POR ID DE ALERTA
+        function actualizarCampo(alertId, campo, valor, elemento) {
+            if (!library[alertId]) return;
+
+            if (campo === 'giftName') {
+                library[alertId].giftName = valor.trim();
+            } else if (campo === 'volumen') {
+                const volNum = parseFloat(valor);
+                library[alertId].volumen = volNum;
+                const label = elemento.parentElement.querySelector('.vol-label');
+                if (label) label.innerText = `Volumen (${Math.round(volNum * 100)}%):`;
+            } else if (campo === 'duracion') {
+                library[alertId].duracion = parseInt(valor) || 5;
+            } else if (campo === 'screen') {
+                library[alertId].screen = valor;
+            }
+            
+            console.log(`Guardando cambios para ${alertId} (${campo}):`, valor);
+            socket.emit('save-library', { library: library, token: userToken });
+        }
+
+        function conectarTikTok() {
             const user = document.getElementById('username').value;
-            if(!user) return alert("Escribe un usuario");
-            socket.emit('set-tiktok-user', user);
-            document.getElementById('status').innerText = "Estado: Conectando...";
+            socket.emit('set-tiktok-user', { username: user, token: userToken });
         }
 
-        function probar(regalo) {
-            socket.emit('test-alert', { gift: regalo });
+        function detenerAlertas() {
+            if (confirm("¿Seguro que quieres detener y limpiar la cola de alertas?")) {
+                socket.emit('stop-alerts', { token: userToken });
+            }
         }
+
+        // SINCRONIZACIÓN DE SOCKETS
+        socket.on('connect', () => {
+            console.log("✅ Conectado al backend mediante Socket.io");
+        });
+
+        socket.on('update-library', (serverLib) => {
+            if (serverLib && Object.keys(serverLib).length > 0) {
+                library = serverLib;
+                renderizarTarjetas();
+            }
+        });
 
         socket.on('status', (data) => {
-            const s = document.getElementById('status');
-            s.innerText = "Estado: " + data.msg;
-            s.style.color = data.color;
+            const el = document.getElementById('statusMsg');
+            if (el) {
+                el.innerText = `Estado: ${data.msg}`;
+                el.style.color = data.color === 'green' ? '#4CAF50' : '#ff5252';
+            }
         });
     </script>
 </body>

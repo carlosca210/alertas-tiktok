@@ -14,15 +14,7 @@
             justify-content: center;
             align-items: center;
         }
-        #container { 
-            width: 800px; /* Tamaño fijo para la prueba */
-            height: 600px;
-            border: 2px solid red; /* Si ves este cuadro rojo, el contenedor está bien */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
+        
         video { 
             display: none; 
             width: 100%; 
@@ -42,66 +34,133 @@
         const socket = io();
         const video = document.getElementById('alertVideo');
 
-        // 1. CONFIGURACIÓN: Aquí añades todos los regalos que quieras
-        // Asegúrate de que el nombre coincida con lo que ves en los logs de Render
-        const library = {
-            "White Rose": { archivo: "videos/rosa.webm", volumen: 0.1 },
-            "Doughnut": { archivo: "videos/dona.webm", volumen: 0.1 }, // Para la rosa pequeña
-            "GG": { archivo: "videos/gg.webm", volumen: 0.1 },
-            "Rosa": { archivo: "videos/rosa-grande.webm", volumen: 0.1 },
-            "Finger Heart": { archivo: "videos/corazon-coreano.webm", volumen: 0.1 }
-            //"Dragon": { archivo: "videos/", volumen: 1.0 }
-        };
+        // 1. CAPTURAR EL SCREEN DESDE LA URL (Ej: http://localhost:10000/?screen=screen1)
+        const urlParams = new URLSearchParams(window.location.search);
+        const miPantalla = urlParams.get('screen') || 'screen1';
 
-        // --- NUEVA LÓGICA DE COLA ---
-        let colaAlertas = []; // Aquí se guardarán los regalos que lleguen
-        let estaReproduciendo = false; // "Semáforo" para saber si el video está ocupado
+        console.log(`📡 Esta ventana está escuchando eventos para: [${miPantalla}]`);
+
+        // Librería dinámica enviada por el servidor (Estructura: { alert_1: {...}, alert_2: {...} })
+        let library = {};
+
+        // 2. VARIABLES DE COLA Y CONTROL DE TIEMPO
+        let colaAlertas = [];
+        let estaReproduciendo = false;
+        let timerDuracion = null;
+        
+        // Historial de IDs procesados para evitar retransmisiones del socket
+        const idsProcesados = new Set();
+        const MAX_HISTORIAL_IDS = 100;
+
+        // Escuchar actualización de librería
+        socket.on('update-library', (newLib) => {
+            if (newLib && Object.keys(newLib).length > 0) {
+                library = newLib;
+                console.log("🔄 Configuración de alertas sincronizada en index.html:", library);
+            }
+        });
+
+        socket.on('connect', () => {
+            console.log("✅ Conectado al socket servidor.");
+        });
+
+        // Limpiamos listeners previos para evitar duplicación por reconexión
+        socket.off('show-alert');
 
         socket.on('show-alert', (data) => {
-            console.log("Señal recibida para:", data.gift);
+            // Filtro por ID único para evitar duplicados de red
+            if (data.msgId && idsProcesados.has(data.msgId)) {
+                console.warn("⚠️ Evento duplicado de red ignorado (msgId repetido):", data.msgId);
+                return;
+            }
 
-            // Si el regalo está en la librería, lo metemos a la fila
-         if (library[data.gift]) {
-             colaAlertas.push(data.gift);
-             procesarSiguiente(); // Intentamos reproducir
-         } else {
-             console.log(`El regalo "${data.gift}" no tiene video asignado.`);
-          }
+            // Obtener la configuración directa que envía server.js o buscar por alertId en la librería
+            const itemConfig = data.config || library[data.alertId];
+
+            // 1. Validar si existe la configuración de la alerta
+            if (!itemConfig) {
+                console.log(`La alerta "${data.alertId || data.gift}" no tiene configuración asignada.`);
+                return;
+            }
+
+            // 2. FILTRO DE PANTALLA (SCREEN)
+            if (itemConfig.screen !== miPantalla) {
+                console.log(`Alerta "${itemConfig.giftName || data.gift}" ignorada (es para ${itemConfig.screen}, esta ventana es ${miPantalla}).`);
+                return;
+            }
+
+            // Registrar el ID procesado
+            if (data.msgId) {
+                idsProcesados.add(data.msgId);
+                if (idsProcesados.size > MAX_HISTORIAL_IDS) {
+                    const primerElemento = idsProcesados.values().next().value;
+                    idsProcesados.delete(primerElemento);
+                }
+            }
+
+            console.log(`✅ Alerta aceptada en [${miPantalla}]:`, itemConfig.giftName || data.gift);
+
+            // Meter a la cola con los datos de volumen y duración dinámicos
+            colaAlertas.push({
+                nombre: itemConfig.giftName || data.gift,
+                archivo: itemConfig.archivo,
+                volumen: itemConfig.volumen ?? 0.5,
+                duracion: itemConfig.duracion ?? 5
+            });
+
+            procesarSiguiente();
         });
 
         function procesarSiguiente() {
-            // Si ya hay un video en pantalla o no hay nadie en la fila, nos detenemos
             if (estaReproduciendo || colaAlertas.length === 0) return;
 
             estaReproduciendo = true;
-            const nombreRegalo = colaAlertas.shift(); // Sacamos el primer regalo de la fila
-            const alertData = library[nombreRegalo];
+            const alertaActual = colaAlertas.shift();
 
-            console.log(`Reproduciendo ahora: ${nombreRegalo}. Quedan en espera: ${colaAlertas.length}`);
+            console.log(`Reproduciendo: ${alertaActual.nombre} | Vol: ${alertaActual.volumen} | Duración: ${alertaActual.duracion}s`);
 
-            // Configuramos el video
-            video.src = alertData.archivo;
-            video.volume = alertData.volumen;
+            video.src = alertaActual.archivo;
+            video.volume = alertaActual.volumen;
             video.style.display = "block";
 
             video.play().catch(e => {
                 console.error("Error al reproducir:", e);
-                terminarAlerta(); // Si falla, pasamos al siguiente para no trabar la cola
+                terminarAlerta();
             });
 
-            // IMPORTANTE: Cuando el video termina, buscamos el siguiente
+            // TEMPORIZADOR DE CORTE POR DURACIÓN
+            if (timerDuracion) clearTimeout(timerDuracion);
+
+            if (alertaActual.duracion && alertaActual.duracion > 0) {
+                timerDuracion = setTimeout(() => {
+                    console.log(`⏱️ Límite de ${alertaActual.duracion}s alcanzado. Cortando alerta...`);
+                    terminarAlerta();
+                }, alertaActual.duracion * 1000);
+            }
+
             video.onended = () => {
-               terminarAlerta();
+                terminarAlerta();
             };
         }
 
         function terminarAlerta() {
+            if (timerDuracion) clearTimeout(timerDuracion);
             video.style.display = "none";
             video.src = "";
-            estaReproduciendo = false; // Liberamos el "semáforo"
-            procesarSiguiente(); // Revisamos si hay más regalos en la fila
+            estaReproduciendo = false;
+            procesarSiguiente();
         }
-        // --- FIN DE LA LÓGICA DE COLA ---
+
+        socket.on('force-stop-alerts', () => {
+            console.warn("🛑 Limpiando cola y deteniendo reproducción por orden remota.");
+            if (timerDuracion) clearTimeout(timerDuracion);
+            colaAlertas = [];
+            video.pause();
+            video.currentTime = 0;
+            video.src = "";
+            video.style.display = "none";
+            estaReproduciendo = false;
+        });
     </script>
 </body>
 </html>
