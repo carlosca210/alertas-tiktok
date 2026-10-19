@@ -62,29 +62,29 @@ const io = new Server(server, {
 
 // 📁 LIBRERÍA DINÁMICA EN MEMORIA
 let dynamicLibrary = {
-    "alert_1": { giftName: "White Rose", archivo: "videos/rosa.webm", volumen: 0.1, duracion: 5, screen: "screen4" },
-    "alert_2": { giftName: "Doughnut", archivo: "videos/dona.webm", volumen: 0.1, duracion: 4, screen: "screen4" },
-    "alert_3": { giftName: "GG", archivo: "videos/gg.webm", volumen: 0.1, duracion: 6, screen: "screen4" },
-    "alert_4": { giftName: "Rosa", archivo: "videos/rosa-grande.webm", volumen: 0.1, duracion: 8, screen: "screen4" },
-    "alert_5": { giftName: "Finger Heart", archivo: "videos/corazon-coreano.webm", volumen: 0.1, duracion: 5, screen: "screen4" },
+    "alert_1": { giftName: "White Rose", archivo: "videos/rosa.webm", volumen: 0.15, duracion: 5, screen: "screen4" },
+    "alert_2": { giftName: "Doughnut", archivo: "videos/dona.webm", volumen: 0.15, duracion: 4, screen: "screen4" },
+    "alert_3": { giftName: "GG", archivo: "videos/gg.webm", volumen: 0.15, duracion: 6, screen: "screen4" },
+    "alert_4": { giftName: "Rosa", archivo: "videos/rosa-grande.webm", volumen: 0.15, duracion: 8, screen: "screen4" },
+    "alert_5": { giftName: "Finger Heart", archivo: "videos/corazon-coreano.webm", volumen: 0.15, duracion: 5, screen: "screen4" },
     //alertas mujeres
     "alert_6": { giftName: "White Rose", archivo: "videos/rosa-blanca-m.webm", volumen: 0.1, duracion: 11, screen: "screen1" },
-    "alert_7": { giftName: "GG", archivo: "videos/gg-m.webm", volumen: 0.1, duracion: 9, screen: "screen1" },
+    "alert_7": { giftName: "GG", archivo: "videos/gg-m.webm", volumen: 0.25, duracion: 9, screen: "screen1" },
     "alert_8": { giftName: "Finger Heart", archivo: "videos/corazon-coreano-m.webm", volumen: 0.1, duracion: 11, screen: "screen1" },
     "alert_9": { giftName: "Rosa", archivo: "videos/rosa-grande-m.webm", volumen: 0.1, duracion: 9, screen: "screen1" },
     "alert_10": { giftName: "Doughnut", archivo: "videos/dona-m.webm", volumen: 0.1, duracion: 9, screen: "screen1" },
     //alertas hombres
-    "alert_11": { giftName: "helado", archivo: "videos/helado.webm", volumen: 0.1, duracion: 9, screen: "screen2" },
+    "alert_11": { giftName: "helado", archivo: "videos/helado.webm", volumen: 0.5, duracion: 9, screen: "screen2" },
     "alert_12": { giftName: "It's corn", archivo: "videos/choclo.webm", volumen: 0.1, duracion: 11, screen: "screen2" },
-    "alert_13": { giftName: "Friendship Necklace", archivo: "videos/collar-osos.webm", volumen: 0.1, duracion: 11, screen: "screen2" },
+    "alert_13": { giftName: "Friendship Necklace", archivo: "videos/collar-osos.webm", volumen: 0.2, duracion: 11, screen: "screen2" },
     "alert_14": { giftName: "capybara", archivo: "videos/capibara.webm", volumen: 0.1, duracion: 14, screen: "screen2" },
-    "alert_15": { giftName: "Coconut", archivo: "videos/palmera.webm", volumen: 0.1, duracion: 14, screen: "screen2" },
+    "alert_15": { giftName: "Coconut", archivo: "videos/palmera.webm", volumen: 0.15, duracion: 14, screen: "screen2" },
     //alertas mujeres mas
-    "alert_16": { giftName: "Cap", archivo: "videos/gorra.webm", volumen: 0.1, duracion: 14, screen: "screen3" },
-    "alert_17": { giftName: "Paper Crane", archivo: "videos/cisne-azul.webm", volumen: 0.1, duracion: 10, screen: "screen3" },
-    "alert_18": { giftName: "Hand Heart", archivo: "videos/corazon-en-manos.webm", volumen: 0.1, duracion: 10, screen: "screen3" },
-    "alert_19": { giftName: "Sunglasses", archivo: "videos/gafas.webm", volumen: 0.1, duracion: 11, screen: "screen3" },
-    "alert_20": { giftName: "Corgi", archivo: "videos/corgi.webm", volumen: 0.1, duracion: 17, screen: "screen3" }
+    "alert_16": { giftName: "Cap", archivo: "videos/gorra.webm", volumen: 0.25, duracion: 14, screen: "screen3" },
+    "alert_17": { giftName: "Paper Crane", archivo: "videos/cisne-azul.webm", volumen: 0.15, duracion: 10, screen: "screen3" },
+    "alert_18": { giftName: "Hand Heart", archivo: "videos/corazon-en-manos.webm", volumen: 0.25, duracion: 10, screen: "screen3" },
+    "alert_19": { giftName: "Sunglasses", archivo: "videos/gafas.webm", volumen: 0.20, duracion: 11, screen: "screen3" },
+    "alert_20": { giftName: "Corgi", archivo: "videos/corgi.webm", volumen: 0.25, duracion: 16, screen: "screen3" }
 };
 
 let tiktokConn;
