@@ -62,29 +62,29 @@ const io = new Server(server, {
 
 // 📁 LIBRERÍA DINÁMICA EN MEMORIA
 let dynamicLibrary = {
-    "alert_1": { giftName: "White Rose", archivo: "videos/rosa.webm", volumen: 0.15, duracion: 5, screen: "screen4" },
-    "alert_2": { giftName: "Doughnut", archivo: "videos/dona.webm", volumen: 0.15, duracion: 4, screen: "screen4" },
-    "alert_3": { giftName: "GG", archivo: "videos/gg.webm", volumen: 0.15, duracion: 6, screen: "screen4" },
-    "alert_4": { giftName: "Rosa", archivo: "videos/rosa-grande.webm", volumen: 0.15, duracion: 8, screen: "screen4" },
-    "alert_5": { giftName: "Finger Heart", archivo: "videos/corazon-coreano.webm", volumen: 0.15, duracion: 5, screen: "screen4" },
+    "alert_1": { giftName: "White Rose", archivo: "https://res.cloudinary.com/uflbmdxy/video/upload/v1792904898/rosa.webm", volumen: 0.15, duracion: 5, screen: "screen4", activo: false },
+    "alert_2": { giftName: "Doughnut", archivo: "https://res.cloudinary.com/uflbmdxy/video/upload/v1792904844/dona.webm", volumen: 0.15, duracion: 4, screen: "screen4", activo: false },
+    "alert_3": { giftName: "GG", archivo: "https://res.cloudinary.com/uflbmdxy/video/upload/v1792901664/gg.webm", volumen: 0.15, duracion: 6, screen: "screen4", activo: false },
+    "alert_4": { giftName: "Rosa", archivo: "https://res.cloudinary.com/uflbmdxy/video/upload/v1792904978/rosa-grande.webm", volumen: 0.15, duracion: 8, screen: "screen4", activo: false },
+    "alert_5": { giftName: "Finger Heart", archivo: "https://res.cloudinary.com/uflbmdxy/video/upload/v1792905095/corazon-coreano.webm", volumen: 0.15, duracion: 5, screen: "screen4", activo: false },
     //alertas mujeres
-    "alert_6": { giftName: "White Rose", archivo: "videos/rosa-blanca-m.webm", volumen: 0.1, duracion: 11, screen: "screen1" },
-    "alert_7": { giftName: "GG", archivo: "videos/gg-m.webm", volumen: 0.25, duracion: 9, screen: "screen1" },
-    "alert_8": { giftName: "Finger Heart", archivo: "videos/corazon-coreano-m.webm", volumen: 0.1, duracion: 11, screen: "screen1" },
-    "alert_9": { giftName: "Rosa", archivo: "videos/rosa-grande-m.webm", volumen: 0.1, duracion: 9, screen: "screen1" },
-    "alert_10": { giftName: "Doughnut", archivo: "videos/dona-m.webm", volumen: 0.1, duracion: 9, screen: "screen1" },
+    "alert_6": { giftName: "White Rose", archivo: "https://res.cloudinary.com/uflbmdxy/video/upload/v1792903424/rosa-blanca-m.webm", volumen: 0.1, duracion: 11, screen: "screen1", activo:true },
+    "alert_7": { giftName: "GG", archivo: "https://res.cloudinary.com/uflbmdxy/video/upload/v1792901666/gg-m.webm", volumen: 0.25, duracion: 9, screen: "screen1", activo:true },
+    "alert_8": { giftName: "Finger Heart", archivo: "https://res.cloudinary.com/uflbmdxy/video/upload/v1792901637/corazon-coreano-m.webm", volumen: 0.1, duracion: 11, screen: "screen1", activo:true },
+    "alert_9": { giftName: "Rosa", archivo: "https://res.cloudinary.com/uflbmdxy/video/upload/v1792901636/rosa-grande-m.webm", volumen: 0.1, duracion: 9, screen: "screen1", activo:true },
+    "alert_10": { giftName: "Doughnut", archivo: "https://res.cloudinary.com/uflbmdxy/video/upload/v1792901665/dona-m.webm", volumen: 0.1, duracion: 9, screen: "screen1", activo:true },
     //alertas hombres
-    "alert_11": { giftName: "Ice Cream Cone", archivo: "videos/helado.webm", volumen: 0.5, duracion: 9, screen: "screen2" },
-    "alert_12": { giftName: "It's corn", archivo: "videos/choclo.webm", volumen: 0.1, duracion: 11, screen: "screen2" },
-    "alert_13": { giftName: "BFF Necklace", archivo: "videos/collar-osos.webm", volumen: 0.2, duracion: 11, screen: "screen2" },
-    "alert_14": { giftName: "capybara", archivo: "videos/capibara.webm", volumen: 0.1, duracion: 14, screen: "screen2" },
-    "alert_15": { giftName: "Coconut", archivo: "videos/palmera.webm", volumen: 0.15, duracion: 14, screen: "screen2" },
+    "alert_11": { giftName: "Ice Cream Cone", archivo: "https://res.cloudinary.com/uflbmdxy/video/upload/v1792901665/helado.webm", volumen: 0.5, duracion: 9, screen: "screen2", activo:true },
+    "alert_12": { giftName: "It's corn", archivo: "https://res.cloudinary.com/uflbmdxy/video/upload/v1792901637/choclo.webm", volumen: 0.1, duracion: 11, screen: "screen2", activo:true },
+    "alert_13": { giftName: "BFF Necklace", archivo: "https://res.cloudinary.com/uflbmdxy/video/upload/v1792901642/collar-osos.webm", volumen: 0.2, duracion: 11, screen: "screen2", activo:true },
+    "alert_14": { giftName: "Capybara", archivo: "https://res.cloudinary.com/uflbmdxy/video/upload/v1792901647/capibara.webm", volumen: 0.1, duracion: 14, screen: "screen2", activo:true },
+    "alert_15": { giftName: "Coconut", archivo: "https://res.cloudinary.com/uflbmdxy/video/upload/v1792904577/palmera.webm", volumen: 0.15, duracion: 14, screen: "screen2", activo:true },
     //alertas mujeres mas
-    "alert_16": { giftName: "Cap", archivo: "videos/gorra.webm", volumen: 0.25, duracion: 14, screen: "screen3" },
-    "alert_17": { giftName: "Paper Crane", archivo: "videos/cisne-azul.webm", volumen: 0.15, duracion: 10, screen: "screen3" },
-    "alert_18": { giftName: "Hand Heart", archivo: "videos/corazon-en-manos.webm", volumen: 0.25, duracion: 10, screen: "screen3" },
-    "alert_19": { giftName: "Sunglasses", archivo: "videos/gafas.webm", volumen: 0.20, duracion: 11, screen: "screen3" },
-    "alert_20": { giftName: "Corgi", archivo: "videos/corgi.webm", volumen: 0.25, duracion: 16, screen: "screen3" }
+    "alert_16": { giftName: "Cap", archivo: "https://res.cloudinary.com/uflbmdxy/video/upload/v1792902028/gorra.webm", volumen: 0.25, duracion: 14, screen: "screen3", activo:true },
+    "alert_17": { giftName: "Paper Crane", archivo: "https://res.cloudinary.com/uflbmdxy/video/upload/v1792901648/cisne-azul.webm", volumen: 0.15, duracion: 10, screen: "screen3", activo:true },
+    "alert_18": { giftName: "Hand Heart", archivo: "https://res.cloudinary.com/uflbmdxy/video/upload/v1792901655/corazon-en-manos.webm", volumen: 0.25, duracion: 10, screen: "screen3", activo:true },
+    "alert_19": { giftName: "Sunglasses", archivo: "https://res.cloudinary.com/uflbmdxy/video/upload/v1792901652/gafas.webm", volumen: 0.20, duracion: 11, screen: "screen3", activo:true },
+    "alert_20": { giftName: "Corgi", archivo: "https://res.cloudinary.com/uflbmdxy/video/upload/v1792901648/corgi.webm", volumen: 0.25, duracion: 16, screen: "screen3", activo:true }
 };
 
 let tiktokConn;
@@ -162,6 +162,12 @@ io.on('connection', (socket) => {
             Object.keys(dynamicLibrary).forEach(alertId => {
                 const config = dynamicLibrary[alertId];
                 if (config.giftName === data.giftName) {
+
+                    // 🛑 VALIDACIÓN: Si la alerta está desactivada (activo: false), la ignoramos
+                    if (config.activo === false) {
+                        console.log(`⚠️ Alerta "${alertId}" (${config.giftName}) omitida porque está desactivada.`);
+                        return;
+                    }
                     
                     // Emitir la alerta 'cantidad' veces a la cola de OBS
                     for (let i = 0; i < cantidad; i++) {
@@ -219,6 +225,13 @@ io.on('connection', (socket) => {
         Object.keys(dynamicLibrary).forEach(alertId => {
             const config = dynamicLibrary[alertId];
             if (config.giftName === giftName) {
+
+                // 🛑 VALIDACIÓN TAMBIÉN EN PRUEBAS MANUALES
+                if (config.activo === false) {
+                    console.log(`⚠️ Alerta de prueba "${alertId}" omitida porque está desactivada.`);
+                    return;
+                }
+
                 io.emit('show-alert', { 
                     gift: giftName,
                     alertId: alertId,
