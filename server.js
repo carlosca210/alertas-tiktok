@@ -128,8 +128,10 @@ io.on('connection', (socket) => {
             tiktokConn = null;
         }
 
-        tiktokConn = new WebcastPushConnection(username);
-
+        tiktokConn = new WebcastPushConnection(username, {
+            signApiKey: process.env.EULERSTREAM_API_KEY
+        });
+        
         tiktokConn.on('gift', (data) => {
             // 1. Manejo de Rachas (Combos de regalos)
             // Si el regalo es de racha (giftType === 1) y aún no termina (repeatEnd es false),
